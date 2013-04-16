@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -78,33 +79,45 @@ public class OfflineGive extends JavaPlugin implements Listener
 		getLogger().info("Settings saved to configuration");
 	}
 
+	private void sendMessage(CommandSender sender, String message)
+	{
+		if (!(sender instanceof Player))
+			message = ChatColor.stripColor(message);
+		sender.sendMessage(message);
+	}
+
 	@SuppressWarnings("boxing")
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
 	{
+		boolean hasPerms = false;
 		if (!(sender instanceof Player))
+			hasPerms = true;
+		else if (sender instanceof Player)
 		{
-			getLogger().info("Commands must be sent by a player.");
-			return true;
+			Player player = (Player) sender;
+			if (!player.isOp() && !player.hasPermission("offlinegive.use"))
+				hasPerms = false;
+			else
+				hasPerms = true;
 		}
-		Player player = (Player) sender;
-		if (!player.isOp() && !player.hasPermission("offlinegive.use"))
+		if (!hasPerms)
 		{
-			player.sendMessage("§cYou cannot use this command");
+			sendMessage(sender, "§cYou cannot use this command");
 			return true;
 		}
 		if (args != null && args.length == 1
 				&& args[0].equalsIgnoreCase("-save"))
 		{
 			save();
-			player.sendMessage("§aSaved to configuration");
+			sendMessage(sender, "§aSaved to configuration");
 			return true;
 		}
 		if (args != null && args.length == 1
 				&& args[0].equalsIgnoreCase("-reload"))
 		{
 			load();
-			player.sendMessage("§aReloaded from configuration");
+			sendMessage(sender, "§aReloaded from configuration");
 			return true;
 		}
 		if (args != null && args.length == 1
@@ -112,13 +125,13 @@ public class OfflineGive extends JavaPlugin implements Listener
 		{
 			if (pending.isEmpty())
 			{
-				player.sendMessage("§7No pending items found in memory");
+				sendMessage(sender, "§7No pending items found in memory");
 				return true;
 			}
-			player.sendMessage("§7Current pending items for offline players:");
+			sendMessage(sender, "§7Current pending items for offline players:");
 			for (PendingItem p : pending)
 				for (ItemStack i : p.items)
-					player.sendMessage(String.format("§ePending for §a%s§e: §a%d §eof §a%d §e(§a%d§e)", p.player, i.getAmount(), i.getTypeId(), i.getDurability()));
+					sendMessage(sender, String.format("§ePending for §a%s§e: §a%d §eof §a%d §e(§a%d§e)", p.player, i.getAmount(), i.getTypeId(), i.getDurability()));
 			return true;
 		}
 		// offlinegive [name] [item] [amount] (durability)
@@ -129,7 +142,7 @@ public class OfflineGive extends JavaPlugin implements Listener
 		int amount = i(args[2]);
 		if (amount < 0)
 		{
-			player.sendMessage("§cThe amount cannot be negative.");
+			sendMessage(sender, "§cThe amount cannot be negative.");
 			return true;
 		}
 		ItemStack add;
@@ -141,7 +154,7 @@ public class OfflineGive extends JavaPlugin implements Listener
 			mat = Material.getMaterial(args[1].toUpperCase());
 			if (mat == null)
 			{
-				player.sendMessage("§cUnrecognized material name: " + args[1]);
+				sendMessage(sender, "§cUnrecognized material name: " + args[1]);
 				return true;
 			}
 		}
@@ -153,7 +166,7 @@ public class OfflineGive extends JavaPlugin implements Listener
 			add.setDurability((short) i(args[3]));
 		}
 		addPending(args[0], add);
-		player.sendMessage(String.format("§a%s §ewill recieve §a%s §eof §a%s §enext login.", args[0], args[2], args[1]));
+		sendMessage(sender, String.format("§a%s §ewill recieve §a%s §eof §a%s §enext login.", args[0], args[2], args[1]));
 		return true;
 	}
 
