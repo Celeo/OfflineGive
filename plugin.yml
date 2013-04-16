@@ -1,0 +1,11 @@
+name: OfflineGive
+version: 1.0.0.0
+author: Celeo
+website: http://www.darktidegames.com/ 
+descriptions: Allows a player to receive items when they next login
+main: com.darktidegames.celeo.offlinegive.OfflineGive
+commands:
+  /offlinegive:
+    usage: /<command> [offline player name] [item] [amount]
+    description: Gives the item to an offline player
+    aliases: [og, offlinegive]
