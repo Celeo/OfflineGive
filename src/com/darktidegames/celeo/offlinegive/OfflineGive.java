@@ -165,8 +165,27 @@ public class OfflineGive extends JavaPlugin implements Listener
 				return false;
 			add.setDurability((short) i(args[3]));
 		}
-		addPending(args[0], add);
-		sendMessage(sender, String.format("§a%s §ewill recieve §a%s §eof §a%s §enext login.", args[0], args[2], args[1]));
+		Player online = getServer().getPlayer(args[0]);
+		if (online != null)
+		{
+			if (PendingItem.getSpace(online.getInventory().getContents(), add.getTypeId()) >= add.getAmount())
+			{
+				online.getInventory().addItem(add);
+				sendMessage(sender, "§eItems given directly to §a"
+						+ online.getName() + "§e, as they are online now");
+			}
+			else
+			{
+				addPending(args[0], add);
+				sendMessage(sender, String.format("§a%s §edoes not have inventory room, but is online. They will recieve §a%s §eof §a%s §enext login.", args[0], args[2], args[1]));
+				online.sendMessage("");
+			}
+		}
+		else
+		{
+			addPending(args[0], add);
+			sendMessage(sender, String.format("§a%s §ewill recieve §a%s §eof §a%s §enext login.", args[0], args[2], args[1]));
+		}
 		return true;
 	}
 

@@ -151,7 +151,7 @@ public class PendingItem
 	 *            int
 	 * @return int
 	 */
-	public int getSpace(ItemStack[] contents, int typeId)
+	public static int getSpace(ItemStack[] contents, int typeId)
 	{
 		int count = 0;
 		ItemStack addItem = new ItemStack(typeId, 1);
